@@ -17,14 +17,6 @@ entity lab1_challenge is
    );     
 end lab1_challenge; 
 
-------------------------------------------------------------
---
--- This is the architecture part of the top level file for Phase 3.
--- This file includes your lower level state machine, and wires up the
--- input and output pins to your state machine.
---
--------------------------------------------------------------
-
 architecture structural of lab1_challenge is
 
    component state_machine
@@ -35,10 +27,6 @@ architecture structural of lab1_challenge is
       );
    end component;
 
-   -- These two signals are used in the clock divider (see below).
-   -- slow_clock is the output of the clock divider, and prescaler is
-   -- an internal signal used within the clock divider.
-	
    signal prescaler_min : unsigned(27 downto 0) := "0000011001101111111100110000"; -- 6,750,000 (4Hz)
    signal prescaler_max : unsigned(27 downto 0) := "1110111001101011001010000000"; -- 250,000,000 (0.1Hz)
    signal prescaler_bit_value : unsigned(19 downto 0) := "11100111111110110011"; -- 950195 (1/256th between max and min) 
@@ -64,7 +52,6 @@ begin
             clock1 <= not clock1;
             prescaler_counter1 <= (others => '0');
          end if;
-
       end if;
    END process;
 

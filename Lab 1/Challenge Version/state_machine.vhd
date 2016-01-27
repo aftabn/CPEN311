@@ -46,51 +46,54 @@ end state_machine;
 
 architecture behavioural of state_machine is
 
-signal next_state, current_state : std_logic_vector(2 downto 0);	
+type state is (A_UPPER, F, T, A_LOWER, B);
+signal next_state, current_state : state;	
+
 begin
 
    process (all)
+
    begin
 
       case current_state is
-         when "000" =>
+         when A_UPPER =>
             if (skip = '0') then 
-               next_state <= "001";
+               next_state <= F;
             else 
-               next_state <= "010";
+               next_state <= T;
             end if;
-         when "001" =>
+         when F =>
             if (skip = '0') then 
-               next_state <= "010";
+               next_state <= T;
             else 
-               next_state <= "011";
+               next_state <= A_LOWER;
             end if;		
-         when "010" =>
+         when T =>
             if (skip = '0') then 
-               next_state <= "011";
+               next_state <= A_LOWER;
             else 
-               next_state <= "100";
+               next_state <= B;
             end if;
-         when "011" =>
+         when A_LOWER =>
             if (skip = '0') then 
-               next_state <= "100";
+               next_state <= B;
             else 
-               next_state <= "000";
+               next_state <= A_UPPER;
             end if;
-         when "100" =>
+         when B =>
             if (skip = '0') then 
-               next_state <= "000";
+               next_state <= A_UPPER;
             else 
-               next_state <= "001";
+               next_state <= F;
             end if;
-         when others => next_state <= "000";
+         when others => next_state <= A_UPPER;
       end case;
 
       -- if the reset signal is high, then the next state is 00 regardless
       -- of the other inputs.
 
       if (resetb = '0') then  
-          next_state <= "000";
+          next_state <= A_UPPER;
       end if;
    end process;
 
@@ -101,15 +104,15 @@ begin
 	
    process(all) 
    begin
-         if (current_state = "000") then -- A
+         if (current_state = A_UPPER) then -- A
             hex0(6 downto 0) <= "0001000";
-         elsif (current_state = "001") then -- f
+         elsif (current_state = F) then -- f
             hex0(6 downto 0) <= "0001110";
-         elsif (current_state = "010") then -- t
+         elsif (current_state = T) then -- t
             hex0(6 downto 0) <= "0000111";
-         elsif (current_state = "011") then -- a
+         elsif (current_state = A_LOWER) then -- a
             hex0(6 downto 0) <= "0100000";
-         elsif (current_state = "100") then -- B
+         elsif (current_state = B) then -- b
             hex0(6 downto 0) <= "0000011";
          end if;
    end process;
