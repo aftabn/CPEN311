@@ -15,7 +15,7 @@ END;
 ARCHITECTURE behavioral OF digit7seg IS
 BEGIN
 	PROCESS(all)
-		variable number := unsigned(3 downto 0);
+		variable number : unsigned(3 downto 0);
 	BEGIN
 		number := digit mod to_unsigned(10, 4);
 
