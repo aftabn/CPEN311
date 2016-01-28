@@ -5,18 +5,6 @@ USE IEEE.NUMERIC_STD.ALL;
 LIBRARY WORK;
 USE WORK.ALL;
 
-----------------------------------------------------------------------
---
---  This is the top level template for Lab 2.  Use the schematic
---  in the lab handout to guide you in creating this structural description.
---  The combinational blocks have already been designed in previous tasks,
---  and the spinwheel block is given to you.  Your task is to combine these
---  blocks, as well as add the various registers shown on the schemetic, and
---  wire them up properly.  The result will be a roulette game you can play
---  on your DE2.
---
------------------------------------------------------------------------
-
 ENTITY roulette IS
 	PORT(   CLOCK_27 : IN STD_LOGIC; -- the fast clock for spinning wheel
 		KEY : IN STD_LOGIC_VECTOR(3 downto 0);  -- includes slow_clock and reset
@@ -37,3 +25,4 @@ END roulette;
 ARCHITECTURE structural OF roulette IS
  --- Your code goes here
 END;
+
