@@ -55,6 +55,6 @@ begin
       end if;
    END process;
 
-    u0: state_machine port map(clock0, KEY(0), SW(0), HEX0);
-    u1: state_machine port map(clock1, KEY(0), SW(1), HEX1);
+   u0: state_machine port map(clock0, KEY(0), SW(0), HEX0);
+   u1: state_machine port map(clock1, KEY(0), SW(1), HEX1);
 end structural;
