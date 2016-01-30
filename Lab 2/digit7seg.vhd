@@ -6,10 +6,8 @@ LIBRARY WORK;
 USE WORK.ALL;
 
 ENTITY digit7seg IS
-	PORT(
-          digit : IN  UNSIGNED(3 DOWNTO 0);  -- number 0 to 9
-          seg7 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0)  -- one per segment
-	);
+	PORT(digit : IN  UNSIGNED(3 DOWNTO 0);  -- number 0 to 9
+        seg7 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0));  -- one per segment
 END;
 
 ARCHITECTURE behavioral OF digit7seg IS

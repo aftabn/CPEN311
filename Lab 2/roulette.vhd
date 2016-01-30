@@ -8,34 +8,34 @@ USE WORK.ALL;
 ENTITY roulette IS
 	PORT(CLOCK_27 : IN STD_LOGIC; -- the fast clock for spinning wheel
 		KEY : IN STD_LOGIC_VECTOR(3 downto 0);  -- includes slow_clock and reset
-		SW : IN STD_LOGIC_VECTOR(17 downto 0);
-		LEDG : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);  -- ledg
-		HEX7 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);  -- digit 7
-		HEX6 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);  -- digit 6
-		HEX5 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0) := (others => '1');  -- digit 5
-		HEX4 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);  -- digit 4
-		HEX3 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);  -- digit 3
-		HEX2 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);  -- digit 2
-		HEX1 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);  -- digit 1
-		HEX0 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0));   -- digit 0
+		SW : IN STD_LOGIC_VECTOR(17 downto 0); -- switches for betting parameters
+		LEDG : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+		HEX7 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+		HEX6 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+		HEX5 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0) := (others => '1');  -- Turn off unused HEX display
+		HEX4 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+		HEX3 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+		HEX2 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+		HEX1 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+		HEX0 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0));
 END roulette;
 
 
 ARCHITECTURE structural OF roulette IS
 	
 	component spinwheel
-		port (fast_clock : in std_logic;   -- clock input
-			resetb : in std_logic;   -- active-low reset input
-			spin_result : OUT UNSIGNED(5 downto 0));  -- current value of the wheel
+		port (fast_clock : in std_logic;
+			resetb : in std_logic;
+			spin_result : OUT UNSIGNED(5 downto 0));
    end component;
 
 	component win
-		port(spin_result_latched : in unsigned(5 downto 0);  -- result of the spin (the winning number)
-			bet_target : in unsigned(5 downto 0); -- bet_target number for bet
-			bet_modifier : in unsigned(3 downto 0); -- as described in the handout
-			win_straightup : out std_logic;  -- whether it is a straight-up winner
-			win_split : out std_logic;  -- whether it is a split bet winner
-			win_corner : out std_logic); -- whether it is a corner bet winner
+		port(spin_result_latched : in unsigned(5 downto 0);
+			bet_target : in unsigned(5 downto 0);
+			bet_modifier : in unsigned(3 downto 0);
+			win_straightup : out std_logic;
+			win_split : out std_logic;
+			win_corner : out std_logic);
 	end component;
 
 	component new_balance
@@ -48,8 +48,8 @@ ARCHITECTURE structural OF roulette IS
 	end component;
 
 	component digit7seg
-		port(digit : IN  UNSIGNED(3 DOWNTO 0);  -- number 0 to 0xF
-	        seg7 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0));  -- one per segment
+		port(digit : IN  UNSIGNED(3 DOWNTO 0);
+	        seg7 : OUT STD_LOGIC_VECTOR(6 DOWNTO 0));
 	end component;
 
 	signal slow_clock : STD_LOGIC := KEY(0);

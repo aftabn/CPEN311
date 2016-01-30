@@ -7,34 +7,12 @@ USE WORK.ALL;
 
 ENTITY win IS
 	PORT(spin_result_latched : in unsigned(5 downto 0);  -- result of the spin (the winning number)
-			bet_target : in unsigned(5 downto 0); -- bet_target number for bet
-			bet_modifier : in unsigned(3 downto 0); -- as described in the handout
-			win_straightup : out std_logic;  -- whether it is a straight-up winner
-			win_split : out std_logic;  -- whether it is a split bet winner
-			win_corner : out std_logic); -- whether it is a corner bet winner
+		bet_target : in unsigned(5 downto 0); -- bet_target number for bet
+		bet_modifier : in unsigned(3 downto 0); -- as described in the handout
+		win_straightup : out std_logic;  -- whether it is a straight-up winner
+		win_split : out std_logic;  -- whether it is a split bet winner
+		win_corner : out std_logic); -- whether it is a corner bet winner
 END win;
-
-------------------------
--- Modifers 
--- 1111|1000|1001
--- 1110|"##"|1010
--- 1101|1100|1011
-
---Board 
---|		 0      |
---|  1 |  2 |  3 |
---|  4 |  5 |  6 |
---|  7 |  8 |  9 |
---| 10 | 11 | 12 |
---| 13 | 14 | 15 |
---| 16 | 17 | 18 |
---| 19 | 20 | 21 |
---| 22 | 23 | 24 |
---| 25 | 26 | 27 |
---| 28 | 29 | 30 |
---| 31 | 32 | 33 |
---| 34 | 35 | 36 |
-------------------------
 
 ARCHITECTURE behavioural OF win IS
 BEGIN

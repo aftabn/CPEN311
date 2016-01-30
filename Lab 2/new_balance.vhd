@@ -19,17 +19,15 @@ ARCHITECTURE behavioural OF new_balance IS
 BEGIN
 	PROCESS(all)
 		variable balance : unsigned(15 downto 0); 
-		variable bet : unsigned(2 downto 0); 
 	BEGIN
-		bet := bet_amount;
-		balance := money - bet;
+		balance := money - bet_amount;
 
 		if (win_straightup = '1') then
-			balance := balance + (to_unsigned(35, 13) * bet) + bet;
+			balance := balance + (to_unsigned(35, 13) * bet_amount) + bet_amount;
 		elsif (win_split = '1') then
-			balance := balance + (to_unsigned(17, 13) * bet) + bet;
+			balance := balance + (to_unsigned(17, 13) * bet_amount) + bet_amount;
 		elsif (win_corner = '1') then
-			balance := balance + (to_unsigned(8, 13) * bet) + bet;
+			balance := balance + (to_unsigned(8, 13) * bet_amount) + bet_amount;
 		end if;
 
 		new_money <= balance;
