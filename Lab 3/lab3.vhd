@@ -1,3 +1,9 @@
+-- ******************************
+-- Name: lab3.vhdl
+-- Created: February 7, 2016
+-- Author: Aftab
+-- ******************************
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -36,10 +42,6 @@ architecture rtl of lab3 is
               VGA_HS, VGA_VS, VGA_BLANK, VGA_SYNC, VGA_CLK : out std_logic);
     end component;
 
-    -- Defining the states needed for drawing
-    type state_type is (INIT, CLEAR_SCREEN, OCTANT1, OCTANT2, OCTANT3,  
-        OCTANT4, OCTANT5, OCTANT6, OCTANT7, OCTANT8, UPDATE, IDLE);
-
     -- Pixel colours in gray code
     constant BLACK  : std_logic_vector(2 downto 0) := "000";
     constant BLUE   : std_logic_vector(2 downto 0) := "001";
@@ -49,6 +51,35 @@ architecture rtl of lab3 is
     constant PURPLE : std_logic_vector(2 downto 0) := "101";
     constant YELLOW : std_logic_vector(2 downto 0) := "110";
     constant WHITE  : std_logic_vector(2 downto 0) := "111";
+
+    function GRAY_COLOR(X : integer) 
+                return std_logic_vector is
+    begin 
+        if (X = 0) then
+            return BLACK;
+        elsif (X = 1) then
+            return BLUE;
+        elsif (X = 2) then
+            return CYAN;
+        elsif (X = 3) then
+            return GREEN;
+        elsif (X = 4) then
+            return YELLOW;
+        elsif (X = 5) then
+            return WHITE;
+        elsif (X = 6) then
+            return PURPLE;
+        elsif (X = 7) then
+            return RED;
+        else 
+            return BLACK;
+        end if;
+    end GRAY_COLOR;
+
+
+    -- Defining the states needed for drawing
+    type state_type is (INIT, CLEAR_SCREEN, START, OCTANT1, OCTANT2, 
+        OCTANT3, OCTANT4, OCTANT5, OCTANT6, OCTANT7, OCTANT8, UPDATE, IDLE);
 
     -- Bottom right corner of the screen
     constant X_MAX : integer := 159;
@@ -86,12 +117,14 @@ begin
                  VGA_CLK   => VGA_CLK);
 
     process (CLOCK_50, KEY(3))  
-        variable state : state_type := INIT;
+        variable state : state_type := IDLE;
+        variable circleCount : integer := 1;
         variable x_int : integer;
         variable y_int : integer;
-        variable offset_x : integer := STARTING_RADIUS;
-        variable offset_y : integer := 0;
-        variable crit : integer := 1 - offset_x;
+        variable radius : integer := STARTING_RADIUS;
+        variable offset_x : integer;
+        variable offset_y : integer;
+        variable crit : integer;
     BEGIN
         if KEY(3) = '0' then
             state := INIT;
@@ -113,9 +146,15 @@ begin
                         x_int := x_int + 1;
                         y_int := 0;
                     else
-                        colour <= BLUE;
-                        state := OCTANT1;
+                        state := START;
                     end if;
+
+                when START =>
+                    offset_x := radius;
+                    offset_y := 0;
+                    crit := 1 - offset_x;
+                    colour <= GRAY_COLOR(circleCount);
+                    state := OCTANT1;
 
                 when OCTANT1 =>
                     x_int := CENTER_X + offset_x;
@@ -170,8 +209,15 @@ begin
 
                     if (offset_y <= offset_x) then
                         state := OCTANT1;
-                    else 
-                        state := IDLE;
+                    else
+                        -- Check if done drawing circles
+                        if (circleCount < 7) then
+                            circleCount := circleCount + 1;
+                            radius := 30 - (2 * circleCount);
+                            state := START;
+                        else 
+                            state := IDLE;
+                        end if;
                     end if;
                 
                 when IDLE =>
