@@ -121,7 +121,7 @@ begin
         variable circleCount : integer := 1;
         variable x_int : integer;
         variable y_int : integer;
-        variable radius : integer := STARTING_RADIUS;
+        variable radius : integer := STARTING_RADIUS - (2 * circleCount);
         variable offset_x : integer;
         variable offset_y : integer;
         variable crit : integer;
@@ -160,6 +160,7 @@ begin
                     x_int := CENTER_X + offset_x;
                     y_int := CENTER_Y + offset_y;
                     state := OCTANT2;
+                    plot <= '1';
 
                 when OCTANT2 =>
                     x_int := CENTER_X + offset_y;
@@ -214,6 +215,7 @@ begin
                         if (circleCount < 7) then
                             circleCount := circleCount + 1;
                             radius := 30 - (2 * circleCount);
+                            plot <= '0';
                             state := START;
                         else 
                             state := IDLE;
