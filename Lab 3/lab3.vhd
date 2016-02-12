@@ -127,6 +127,7 @@ begin
         variable crit : integer;
     BEGIN
         if KEY(3) = '0' then
+				plot <= '0';
             state := INIT;
 
         elsif rising_edge (CLOCK_50) THEN
@@ -136,8 +137,9 @@ begin
             case state is
                 when INIT => 
                     colour <= BLACK;
-                    plot <= '1';
                     state := CLEAR_SCREEN;
+						  x_int := 0;
+						  y_int := 0;
 
                 when CLEAR_SCREEN =>
                     if (y_int < Y_MAX) then
