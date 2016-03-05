@@ -42,6 +42,10 @@ architecture rtl of lab3 is
               VGA_HS, VGA_VS, VGA_BLANK, VGA_SYNC, VGA_CLK : out std_logic);
     end component;
 
+    -- Defining the states needed for drawing
+    type state_type is (INIT, CLEAR_SCREEN, OCTANT1, OCTANT2, OCTANT3,  
+        OCTANT4, OCTANT5, OCTANT6, OCTANT7, OCTANT8, UPDATE, IDLE);
+
     -- Pixel colours in gray code
     constant BLACK  : std_logic_vector(2 downto 0) := "000";
     constant BLUE   : std_logic_vector(2 downto 0) := "001";
@@ -52,35 +56,6 @@ architecture rtl of lab3 is
     constant YELLOW : std_logic_vector(2 downto 0) := "110";
     constant WHITE  : std_logic_vector(2 downto 0) := "111";
 
-    function GRAY_COLOR(X : integer) 
-                return std_logic_vector is
-    begin 
-        if (X = 0) then
-            return BLACK;
-        elsif (X = 1) then
-            return BLUE;
-        elsif (X = 2) then
-            return CYAN;
-        elsif (X = 3) then
-            return GREEN;
-        elsif (X = 4) then
-            return YELLOW;
-        elsif (X = 5) then
-            return WHITE;
-        elsif (X = 6) then
-            return PURPLE;
-        elsif (X = 7) then
-            return RED;
-        else 
-            return BLACK;
-        end if;
-    end GRAY_COLOR;
-
-
-    -- Defining the states needed for drawing
-    type state_type is (INIT, CLEAR_SCREEN, START, OCTANT1, OCTANT2, 
-        OCTANT3, OCTANT4, OCTANT5, OCTANT6, OCTANT7, OCTANT8, UPDATE, IDLE);
-
     -- Bottom right corner of the screen
     constant X_MAX : integer := 159;
     constant Y_MAX : integer := 119;
@@ -89,8 +64,6 @@ architecture rtl of lab3 is
     constant STARTING_RADIUS : integer := 30;
     constant CENTER_X : integer := 60;
     constant CENTER_Y : integer := 60;
-
-
 
     signal x : std_logic_vector(7 downto 0) := (others => '0');
     signal y : std_logic_vector(6 downto 0) := (others => '0');
@@ -118,88 +91,124 @@ begin
 
     process (CLOCK_50, KEY(3))  
         variable state : state_type := IDLE;
-        variable circleCount : integer := 1;
-        variable x_int : integer;
-        variable y_int : integer;
-        variable radius : integer := STARTING_RADIUS - (2 * circleCount);
-        variable offset_x : integer;
-        variable offset_y : integer;
-        variable crit : integer;
+        variable prevState : state_type := IDLE;
+        variable x0 : integer;
+        variable y0 : integer;
+        variable x1 : integer;
+        variable y1 : integer;
+
+        -- For Bresenham Line Algorithm
+        variable dx : integer;
+        variable dy : integer;
+        variable sx : integer;
+        variable sy : integer;
+        variable err : integer;
+        variable e2 : integer;
+
+        -- For Bresenham Circle Algorithm
+        variable offset_x : integer := STARTING_RADIUS;
+        variable offset_y : integer := 0;
+        variable crit : integer := 1 - offset_x;
     BEGIN
         if KEY(3) = '0' then
-				plot <= '0';
             state := INIT;
 
         elsif rising_edge (CLOCK_50) THEN
-            x_int := to_integer(unsigned(x));
-            y_int := to_integer(unsigned(y));
+            x0 := to_integer(unsigned(x));
+            y0 := to_integer(unsigned(y));
 
             case state is
                 when INIT => 
                     colour <= BLACK;
+                    plot <= '1';
                     state := CLEAR_SCREEN;
-                    x_int := 0;
-                    y_int := 0;
+                    x0 := 0;
+                    y0 := 0;
 
                 when CLEAR_SCREEN =>
-                    if (y_int < Y_MAX) then
-                        y_int := y_int + 1;
-                    elsif (x_int < X_MAX) then
-                        x_int := x_int + 1;
-                        y_int := 0;
+                    if (y0 < Y_MAX) then
+                        y0 := y0 + 1;
+                    elsif (x0 < X_MAX) then
+                        x0 := x0 + 1;
+                        y0 := 0;
                     else
-                        state := START;
+                        colour <= BLUE;
+                        state := OCTANT1_5;
+                        prevState := OCTANT1_5;
                     end if;
 
-                when START =>
-                    offset_x := radius;
-                    offset_y := 0;
-                    crit := 1 - offset_x;
-                    colour <= GRAY_COLOR(circleCount);
-                    state := OCTANT1;
+                when OCTANT1_5 =>
+                    x0 := CENTER_X + offset_x;
+                    y0 := CENTER_Y + offset_y;
 
-                when OCTANT1 =>
-                    x_int := CENTER_X + offset_x;
-                    y_int := CENTER_Y + offset_y;
-                    state := OCTANT2;
-                    plot <= '1';
+                    x1 := CENTER_X - offset_x;
+                    y1 := CENTER_Y - offset_y;
 
-                when OCTANT2 =>
-                    x_int := CENTER_X + offset_y;
-                    y_int := CENTER_Y + offset_x;
-                    state := OCTANT3;
+                    state := DRAW_LINE;
 
-                when OCTANT3 =>
-                    x_int := CENTER_X - offset_y;
-                    y_int := CENTER_Y + offset_x;
-                    state := OCTANT4;
+                when OCTANT2_6 =>
+                    x0 := CENTER_X + offset_y;
+                    y0 := CENTER_Y + offset_x;
 
-                when OCTANT4 =>
-                    x_int := CENTER_X - offset_x;
-                    y_int := CENTER_Y + offset_y;
-                    state := OCTANT5;
+                    x1 := CENTER_X - offset_y;
+                    y1 := CENTER_Y - offset_x;
 
-                when OCTANT5 =>
-                    x_int := CENTER_X - offset_x;
-                    y_int := CENTER_Y - offset_y;
-                    state := OCTANT6;
+                    state := DRAW_LINE;
 
-                when OCTANT6 =>
-                    x_int := CENTER_X - offset_y;
-                    y_int := CENTER_Y - offset_x;
-                    state := OCTANT7;
+                when OCTANT3_7 =>
+                    x0 := CENTER_X - offset_y;
+                    y0 := CENTER_Y + offset_x;
 
-                when OCTANT7 =>
-                    x_int := CENTER_X + offset_x;
-                    y_int := CENTER_Y - offset_y;
-                    state := OCTANT8;
+                    x1 := CENTER_X + offset_x;
+                    y1 := CENTER_Y - offset_y;
 
-                when OCTANT8 =>
-                    x_int := CENTER_X + offset_y;
-                    y_int := CENTER_Y - offset_x;
-                    state := UPDATE;
+                    state := DRAW_LINE;
 
-                when UPDATE =>
+                when OCTANT4_8 =>
+                    x0 := CENTER_X - offset_x;
+                    y0 := CENTER_Y + offset_y;
+
+                    x1 := CENTER_X + offset_y;
+                    y1 := CENTER_Y - offset_x;
+
+                    state := DRAW_LINE;
+
+                when START_LINE =>
+                    dx := abs(x1 - x0);
+                    dy := abs(y1 - y0);
+
+                    if (x0 < x1) then
+                        sx := 1;
+                    else 
+                        sx := -1;
+                    end if;
+
+                    if (y0 < y1) then
+                        sy := 1;
+                    else 
+                        sy := -1;
+                    end if;
+
+                    err := dx - dy;
+
+                when DRAW_LINE =>
+                    if (x0 = x1 and y0 = y1) then
+                        case prevState is
+                            when OCTANT1_5 => state := OCTANT2_6;
+                            when OCTANT2_6 => state := OCTANT3_7;
+                            when OCTANT3_7 => state := OCTANT4_8;
+                            when OCTANT4_8 => state := UPDATE_CIRCLE;
+                        state := <INSERT NEXT STATE>
+
+                    x1 := CENTER_X + offset_y;
+                    y1 := CENTER_Y - offset_x;
+
+                    state := DRAW_LINE;
+
+                when UPDATE_LINE =>
+
+
+                when UPDATE_CIRCLE =>
                     -- Apply Bresenham algorithm updates
                     offset_y := offset_y + 1;
 
@@ -212,16 +221,8 @@ begin
 
                     if (offset_y <= offset_x) then
                         state := OCTANT1;
-                    else
-                        -- Check if done drawing circles
-                        if (circleCount < 7) then
-                            circleCount := circleCount + 1;
-                            radius := 30 - (2 * circleCount);
-                            plot <= '0';
-                            state := START;
-                        else 
-                            state := IDLE;
-                        end if;
+                    else 
+                        state := IDLE;
                     end if;
                 
                 when IDLE =>
@@ -231,8 +232,8 @@ begin
                     state := IDLE;
             end case;
 
-            x <= std_logic_vector(to_unsigned(x_int, x'length));
-            y <= std_logic_vector(to_unsigned(y_int, y'length));
+            x <= std_logic_vector(to_unsigned(x0, x'length));
+            y <= std_logic_vector(to_unsigned(y0, y'length));
 
         end if;
     END process;
