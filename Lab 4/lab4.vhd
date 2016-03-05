@@ -64,7 +64,9 @@ begin
 
 		-- This variable will store the x position of the paddle (left-most pixel of the paddle)
 		variable paddle_green_x : unsigned(draw.x'range);
+		variable paddle_green_y : unsigned(draw.y'range);
 		variable paddle_red_x : unsigned(draw.x'range);
+		variable paddle_red_y : unsigned(draw.y'range);
 
 		-- These variables will store the puck and the puck velocity.
 		-- In this implementation, the puck velocity has two components: an x component
@@ -83,7 +85,9 @@ begin
 				draw <= (x => to_unsigned(0, draw.x'length), 
 						y => to_unsigned(0, draw.y'length));			  
 				paddle_green_x := to_unsigned(PADDLE_X_START, paddle_green_x'length);
+				paddle_green_y := to_unsigned(PADDLE_GREEN_ROW, paddle_green_y'length);
 				paddle_red_x := to_unsigned(PADDLE_X_START, paddle_red_x'length);
+				paddle_red_y := to_unsigned(PADDLE_RED_ROW, paddle_red_y'length);
 		     	paddle_width := PADDLE_MAX_WIDTH;
 				puck.x := to_unsigned(FACEOFF_X, 8 ) & "00000000";
 				puck.y := to_unsigned(FACEOFF_Y, 8 ) & "00000000";
@@ -103,7 +107,9 @@ begin
 	           		draw <= (x => to_unsigned(0, draw.x'length), 
 						y => to_unsigned(0, draw.y'length));			  
 					paddle_green_x := to_unsigned(PADDLE_X_START, paddle_green_x'length);
+					paddle_green_y := to_unsigned(PADDLE_GREEN_ROW, paddle_green_y'length);
 					paddle_red_x := to_unsigned(PADDLE_X_START, paddle_red_x'length);
+					paddle_red_y := to_unsigned(PADDLE_RED_ROW, paddle_red_y'length);
 			     	paddle_width := PADDLE_MAX_WIDTH;
 					puck.x := to_unsigned(FACEOFF_X, 8 ) & "00000000";
 					puck.y := to_unsigned(FACEOFF_Y, 8 ) & "00000000";
@@ -199,7 +205,7 @@ begin
 
 				-- Starts erasing the first pixel of the paddle
 				when ERASE_PADDLE_GREEN_ENTER =>		  
-					draw.y <= to_unsigned(PADDLE_GREEN_ROW, draw.y'length);
+					draw.y <= paddle_green_y;
 					draw.x <= paddle_green_x;	
 					colour <= BLACK;
 					plot <= '1';			
@@ -211,13 +217,13 @@ begin
 					if draw.x = RIGHT_LINE - 1 then		
 						state := ERASE_PADDLE_RED_ENTER; 
 					else
-						draw.y <= to_unsigned(PADDLE_GREEN_ROW, draw.y'length);
+						draw.y <= paddle_green_y;
 						draw.x <= draw.x + to_unsigned(1, draw.x'length);
 					end if;
 
 				-- Starts erasing the first pixel of the paddle
 				when ERASE_PADDLE_RED_ENTER =>		  
-					draw.y <= to_unsigned(PADDLE_RED_ROW, draw.y'length);
+					draw.y <= paddle_red_y;
 					draw.x <= paddle_red_x;	
 					colour <= BLACK;
 					plot <= '1';			
@@ -229,7 +235,7 @@ begin
 					if draw.x = RIGHT_LINE - 1 then	
 						state := DRAW_PADDLE_GREEN_ENTER;  -- next state is DRAW_PADDLE 
 					else
-						draw.y <= to_unsigned(PADDLE_RED_ROW, draw.y'length);
+						draw.y <= paddle_red_y;
 						draw.x <= draw.x + to_unsigned(1, draw.x'length);
 					end if;
 
@@ -249,7 +255,17 @@ begin
 						end if;
 					end if;
 
-					draw.y <= to_unsigned(PADDLE_GREEN_ROW, draw.y'length);				  
+					if (SW(1) = '1') then
+						if paddle_green_y > to_unsigned(TOP_LINE + 15, paddle_green_y'length) then 				 
+							paddle_green_y := paddle_green_y - to_unsigned(1, paddle_green_y'length);						
+						end if;
+					else
+						if paddle_green_y < to_unsigned(PADDLE_GREEN_ROW, paddle_green_y'length) then 				 
+							paddle_green_y := paddle_green_y + to_unsigned(1, paddle_green_y'length);						
+						end if;
+					end if;
+
+					draw.y <= paddle_green_y;				  
 					draw.x <= paddle_green_x;  -- get ready for next state			  
 					colour <= GREEN; -- when we draw the paddle, the colour will be GREEN		  
 					state := DRAW_PADDLE_GREEN_LOOP;
@@ -260,13 +276,13 @@ begin
 						plot  <= '1';  
 						state := DRAW_PADDLE_RED_ENTER;	-- next state is ERASE_PUCK
 					else		
-						draw.y <= to_unsigned(PADDLE_GREEN_ROW, draw.y'length);
+						draw.y <= paddle_green_y;
 						draw.x <= draw.x + to_unsigned(1, draw.x'length);
 					end if;
 	
 				-- Starts drawing the first pixel of the paddle
 				when DRAW_PADDLE_RED_ENTER =>
-					if (SW(17) = '1') then 
+					if (SW(16) = '1') then 
 						if paddle_red_x < to_unsigned(RIGHT_LINE - paddle_width - 2, paddle_red_x'length) then 				 
 							paddle_red_x := paddle_red_x + to_unsigned(2, paddle_red_x'length);						
 						elsif paddle_red_x = to_unsigned(RIGHT_LINE - paddle_width - 2, paddle_red_x'length) then
@@ -280,7 +296,18 @@ begin
 						end if;
 					end if;
 
-					draw.y <= to_unsigned(PADDLE_RED_ROW, draw.y'length);				  
+
+					if (SW(17) = '1') then
+						if paddle_red_y > to_unsigned(TOP_LINE + 15, paddle_red_y'length) then 				 
+							paddle_red_y := paddle_red_y - to_unsigned(1, paddle_red_y'length);						
+						end if;
+					else
+						if paddle_red_y < to_unsigned(PADDLE_RED_ROW, paddle_red_y'length) then 				 
+							paddle_red_y := paddle_red_y + to_unsigned(1, paddle_red_y'length);						
+						end if;
+					end if;
+
+					draw.y <= paddle_red_y;				  
 					draw.x <= paddle_red_x;  -- get ready for next state			  
 					colour <= RED; -- when we draw the paddle, the colour will be GREEN		  
 					state := DRAW_PADDLE_RED_LOOP;
@@ -291,7 +318,7 @@ begin
 						plot  <= '0';  
 						state := ERASE_PUCK;	-- next state is ERASE_PUCK
 					else		
-						draw.y <= to_unsigned(PADDLE_RED_ROW, draw.y'length);
+						draw.y <= paddle_red_y;
 						draw.x <= draw.x + to_unsigned(1, draw.x'length);
 					end if;
 
@@ -333,35 +360,45 @@ begin
 					end if;			
 
 					-- TODO: Add accidental collision detection from red as puck leaves green
+					if (puck_velocity.y(15 downto 0) > "00000000") then
 					if turn = TURN_GREEN then
 						-- Check for accidental red collision first
-						if puck.y(15 downto 8) = PADDLE_RED_ROW - 1 or puck.y(15 downto 8) = PADDLE_RED_ROW then 
+						if (SW(17) = '1' and puck.y(15 downto 8) = paddle_red_y - 2) or puck.y(15 downto 8) = paddle_red_y - 1 or puck.y(15 downto 8) = paddle_red_y or (SW(17) = '1' and puck.y(15 downto 8) = paddle_red_y + 1)then 
 							if puck.x(15 downto 8) >= paddle_red_x and puck.x(15 downto 8) <= paddle_red_x + paddle_width then
 								state := INIT;
 							end if;
 						-- Check if green hit it
-						elsif puck.y(15 downto 8) = PADDLE_GREEN_ROW - 1 then
+						elsif (SW(1) = '1' and puck.y(15 downto 8) = paddle_green_y - 2) or puck.y(15 downto 8) = paddle_green_y - 1 or puck.y(15 downto 8) = paddle_green_y or (SW(1) = '1' and puck.y(15 downto 8) = paddle_green_y + 1)then
 							if puck.x(15 downto 8) >= paddle_green_x and puck.x(15 downto 8) <= paddle_green_x + paddle_width then
 								puck_velocity.y := 0 - puck_velocity.y;
 								turn := TURN_RED;
-							else
+							elsif (puck.y(15 downto 8) >= PADDLE_GREEN_ROW - 1) then
 								state := INIT;
-							end if;	  
+							end if;	 
+						elsif (puck.y(15 downto 8) >= PADDLE_GREEN_ROW - 1) then
+							state := INIT;
 						end if;
 
 
 					else -- RED's turn
-						if puck_velocity.y > 0 then
-							if puck.y(15 downto 8) = PADDLE_RED_ROW - 1 then
-								if puck.x(15 downto 8) >= paddle_red_x and puck.x(15 downto 8) <= paddle_red_x + paddle_width then
-									puck_velocity.y := 0 - puck_velocity.y;
-									turn := TURN_GREEN;
-								else
-									state := INIT;
-								end if;	  
+						-- Check for accidental green collision first
+						if (SW(1) = '1' and puck.y(15 downto 8) = paddle_green_x - 2) or puck.y(15 downto 8) = paddle_green_y - 1 or puck.y(15 downto 8) = paddle_green_y or (SW(1) = '1' and puck.y(15 downto 8) = paddle_green_x + 1) then 
+							if puck.x(15 downto 8) >= paddle_green_x and puck.x(15 downto 8) <= paddle_green_x + paddle_width then
+								state := INIT;
 							end if;
+						-- Check if red hit it
+						elsif (SW(17) = '1' and puck.y(15 downto 8) = paddle_red_y - 2) or puck.y(15 downto 8) = paddle_red_y - 1 or puck.y(15 downto 8) = paddle_red_y or (SW(17) = '1' and puck.y(15 downto 8) = paddle_red_y + 1)then
+							if puck.x(15 downto 8) >= paddle_red_x and puck.x(15 downto 8) <= paddle_red_x + paddle_width then
+								puck_velocity.y := 0 - puck_velocity.y;
+								turn := TURN_GREEN;
+							elsif (puck.y(15 downto 8) >= PADDLE_RED_ROW - 1) then
+								state := INIT;
+							end if;	 
+						elsif (puck.y(15 downto 8) >= PADDLE_RED_ROW - 1) then
+							state := INIT;
 						end if;
 					end if;
+				end if;
 
 				when DRAW_PUCK =>
 					if turn = TURN_GREEN then
