@@ -27,14 +27,14 @@ ARCHITECTURE Behavior OF task2 IS
 	END COMPONENT;
 
 	COMPONENT audio_and_video_config
-		PORT (
+		PORT ( 
 			CLOCK_50, reset : IN STD_LOGIC;
 			I2C_SDAT : INOUT STD_LOGIC;
 			I2C_SCLK : OUT STD_LOGIC
 		);
 	END COMPONENT;
 
-	COMPONENT audio_codec
+	COMPONENT audio_codec  
 		PORT (
 			CLOCK_50, reset, read_s, write_s : IN STD_LOGIC;
 			writedata_left, writedata_right : IN STD_LOGIC_VECTOR(23 DOWNTO 0);
