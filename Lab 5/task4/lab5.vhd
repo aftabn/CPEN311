@@ -62,6 +62,15 @@ ARCHITECTURE behavior OF lab5 IS
 		);
 	END COMPONENT;
 
+	COMPONENT rom1_p
+		PORT
+		(
+			address		: IN STD_LOGIC_VECTOR (4 DOWNTO 0);
+			clock		: IN STD_LOGIC  := '1';
+			q		: OUT STD_LOGIC_VECTOR (3 DOWNTO 0)
+		);
+	END COMPONENT;
+
 
 	TYPE notes_array_type IS ARRAY (6 downto 0) of INTEGER;
 	TYPE write_state_type IS (WRITTEN, WAITING);
@@ -77,6 +86,8 @@ ARCHITECTURE behavior OF lab5 IS
 	CONSTANT NOTES : notes_array_type := (C4, D4, E4, F4, G4, A4, B4);
 
 	SIGNAL max_note_count : INTEGER;
+	SIGNAL current_note : INTEGER;
+	SIGNAL next_note : INTEGER;
 
 	SIGNAL read_ready, write_ready, read_s, write_s : STD_LOGIC;
 	SIGNAL writedata_left, writedata_right : STD_LOGIC_VECTOR(23 DOWNTO 0);
