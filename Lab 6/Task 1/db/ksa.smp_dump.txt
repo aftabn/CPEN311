@@ -1,0 +1,6 @@
+
+State Machine - |ksa|state
+Name state.state_done state.state_fill state.state_init 
+state.state_init 0 0 0 
+state.state_fill 0 1 1 
+state.state_done 1 0 1 
