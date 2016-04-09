@@ -1,6 +1,0 @@
-<?xml version="1.0" ?>
-<LOG_ROOT>
-	<PROJECT NAME="ksa">
-		<CBX_INST_ENTRY INSTANCE_NAME="|ksa|s_memory:u0|altsyncram:altsyncram_component" CBX_FILE_NAME="altsyncram_lrh1.tdf"/>
-	</PROJECT>
-</LOG_ROOT>
